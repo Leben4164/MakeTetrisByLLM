@@ -134,10 +134,11 @@
       });
     }
 
-    // 4. 플레이어 정보 (비워둠)
+    // 4. 플레이어 정보 (점수 변수 추가)
     const player = {
       pos: { x: 0, y: 0 },
-      matrix: null, // 이제 고정된 블록 대신 랜덤으로 채워집니다.
+      matrix: null,
+      score: 0, // 점수를 저장할 공간
     };
 
     // 5. 게임 보드(아레나) 생성 함수 (가로 10, 세로 20 크기의 0으로 채워진 배열)
@@ -269,23 +270,69 @@
       }
     });
 
-    // 14. 새로운 블록을 랜덤하게 생성하는 함수
+    // 14. 수정된 플레이어 리셋 함수 (게임 오버 시 점수 초기화 추가)
     function playerReset() {
       const pieces = 'ILJOTSZ';
-      // 문자열 길이를 이용해 7가지 중 하나의 문자를 무작위로 뽑음
       const randomPiece = pieces[pieces.length * Math.random() | 0];
       player.matrix = createPiece(randomPiece);
 
-      // 블록을 화면 맨 위, 가운데로 정렬
       player.pos.y = 0;
       player.pos.x = (arena[0].length / 2 | 0) -
         (player.matrix[0].length / 2 | 0);
 
-      // 만약 새 블록이 나오자마자 기존 블록(벽)과 충돌한다면 (게임 오버)
+      // 새 블록이 나오자마자 충돌하면 게임 오버
       if (collide(arena, player)) {
-        // 게임 보드를 0으로 싹 비워서 게임을 다시 시작합니다.
         arena.forEach(row => row.fill(0));
+
+        // 게임이 재시작되면 점수도 0으로 초기화
+        player.score = 0;
+        updateScore();
       }
+    }
+
+    // 15. 꽉 찬 줄을 지우고 점수를 계산하는 함수
+    function arenaSweep() {
+      let rowCount = 1; // 한 번에 지운 줄 수에 따른 점수 배수
+
+      // 보드의 맨 아래 줄부터 위로 올라가면서 검사합니다.
+      outer: for (let y = arena.length - 1; y >= 0; --y) {
+        for (let x = 0; x < arena[y].length; ++x) {
+          // 빈 칸(0)이 하나라도 있다면 꽉 찬 것이 아니므로 다음 줄로 넘어갑니다.
+          if (arena[y][x] === 0) {
+            continue outer;
+          }
+        }
+
+        // 이 줄에 0이 하나도 없다면 (꽉 찼다면)
+        // 배열에서 해당 줄을 잘라내고(splice), 0으로 싹 비워서 다시 맨 위에 끼워 넣습니다(unshift).
+        const row = arena.splice(y, 1)[0].fill(0);
+        arena.unshift(row);
+        ++y; // 윗줄들이 아래로 한 칸씩 밀려내려왔으므로, 현재 위치(y)를 한 번 더 검사합니다.
+
+        // 점수 추가 (한 번에 여러 줄을 깨면 10, 20, 40, 80 순으로 점수가 커짐)
+        player.score += rowCount * 10;
+        rowCount *= 2;
+      }
+    }
+
+    // 16. 점수를 HTML 화면에 업데이트하는 함수
+    function updateScore() {
+      document.getElementById('score').innerText = player.score;
+    }
+
+    // 10. 수정된 플레이어 하강 함수 (줄 지우기 및 점수 갱신 추가)
+    function playerDrop() {
+      player.pos.y += 1;
+      if (collide(arena, player)) {
+        player.pos.y -= 1;
+        merge(arena, player);
+        playerReset();
+
+        // 블록이 바닥에 닿아 고정될 때마다 꽉 찬 줄이 있는지 확인!
+        arenaSweep();
+        updateScore();
+      }
+      dropCounter = 0;
     }
 
     // 12. 자동 하강을 위한 시간 변수 설정
