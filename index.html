@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>웹 테트리스 게임</title>
+  <style>
+    body {
+      background-color: #202028;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    #game-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    canvas {
+      background-color: #000;
+      border: 2px solid #333;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .score-board {
+      display: flex;
+      flex-direction: column;
+      font-size: 24px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>TETRIS</h1>
+  <div id="game-container">
+    <!-- 테트리스 게임이 그려질 캔버스 (가로 10칸, 세로 20칸 비율) -->
+    <canvas id="tetris" width="300" height="600"></canvas>
+
+    <div class="score-board">
+      <div>점수: <span id="score">0</span></div>
+    </div>
+  </div>
+
+  <script>
+    // 다음 단계에서 여기에 JavaScript 코드를 작성할 예정입니다.
+    const canvas = document.getElementById('tetris');
+    const context = canvas.getContext('2d');
+
+    // 캔버스의 크기를 블록 단위로 스케일링 (1블록 = 30px)
+    context.scale(30, 30);
+  </script>
+</body>
+
+</html>
