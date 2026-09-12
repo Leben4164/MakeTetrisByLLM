@@ -49,12 +49,102 @@
   </div>
 
   <script>
-    // 다음 단계에서 여기에 JavaScript 코드를 작성할 예정입니다.
     const canvas = document.getElementById('tetris');
     const context = canvas.getContext('2d');
 
     // 캔버스의 크기를 블록 단위로 스케일링 (1블록 = 30px)
     context.scale(30, 30);
+
+    // 1. 7가지 테트로미노 색상 정의
+    // 인덱스 번호(1~7)와 모양 행렬의 숫자가 일치하도록 설정합니다.
+    const colors = [
+      null,
+      '#FF0D72', // 1: T (분홍)
+      '#0DC2FF', // 2: I (하늘)
+      '#0DFF72', // 3: S (연두)
+      '#F538FF', // 4: Z (보라)
+      '#FF8E0D', // 5: L (주황)
+      '#FFE138', // 6: J (노랑)
+      '#3877FF'  // 7: O (파랑)
+    ];
+
+    // 2. 테트로미노 모양(행렬) 생성 함수
+    function createPiece(type) {
+      if (type === 'T') {
+        return [
+          [0, 1, 0],
+          [1, 1, 1],
+          [0, 0, 0],
+        ];
+      } else if (type === 'I') {
+        return [
+          [0, 2, 0, 0],
+          [0, 2, 0, 0],
+          [0, 2, 0, 0],
+          [0, 2, 0, 0],
+        ];
+      } else if (type === 'S') {
+        return [
+          [0, 3, 3],
+          [3, 3, 0],
+          [0, 0, 0],
+        ];
+      } else if (type === 'Z') {
+        return [
+          [4, 4, 0],
+          [0, 4, 4],
+          [0, 0, 0],
+        ];
+      } else if (type === 'L') {
+        return [
+          [0, 5, 0],
+          [0, 5, 0],
+          [0, 5, 5],
+        ];
+      } else if (type === 'J') {
+        return [
+          [0, 6, 0],
+          [0, 6, 0],
+          [6, 6, 0],
+        ];
+      } else if (type === 'O') {
+        return [
+          [7, 7],
+          [7, 7],
+        ];
+      }
+    }
+
+    // 3. 블록을 화면(캔버스)에 그리는 함수
+    function drawMatrix(matrix, offset) {
+      matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+          // 값이 0이 아닐 때만 색칠합니다.
+          if (value !== 0) {
+            context.fillStyle = colors[value];
+            // offset은 블록이 그려질 기준 좌표(x, y)입니다.
+            context.fillRect(x + offset.x, y + offset.y, 1, 1);
+
+            // 블록의 테두리를 그려서 구분을 명확하게 합니다.
+            context.lineWidth = 0.05;
+            context.strokeStyle = 'black';
+            context.strokeRect(x + offset.x, y + offset.y, 1, 1);
+          }
+        });
+      });
+    }
+
+    // 4. 테스트 그리기 (T 모양 블록을 x:3, y:3 위치에 그려봅니다)
+    const player = {
+      pos: { x: 3, y: 3 },
+      matrix: createPiece('T'), // 'I', 'O', 'S' 등으로 바꿔서 테스트해 보세요!
+    };
+
+    // 배경을 까맣게 칠하고 블록 그리기
+    context.fillStyle = '#000';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawMatrix(player.matrix, player.pos);
   </script>
 </body>
 
