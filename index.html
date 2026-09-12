@@ -134,10 +134,10 @@
       });
     }
 
-    // 4. 플레이어 정보 (위치와 모양)
+    // 4. 플레이어 정보 (비워둠)
     const player = {
-      pos: { x: 3, y: 3 },
-      matrix: createPiece('T'),
+      pos: { x: 0, y: 0 },
+      matrix: null, // 이제 고정된 블록 대신 랜덤으로 채워집니다.
     };
 
     // 5. 게임 보드(아레나) 생성 함수 (가로 10, 세로 20 크기의 0으로 채워진 배열)
@@ -196,19 +196,17 @@
       }
     }
 
-    // 10. 플레이어 하강 함수 (수정됨)
+    // 10. 수정된 플레이어 하강 함수 (랜덤 블록 생성 적용)
     function playerDrop() {
       player.pos.y += 1;
-      // 아래로 내려갔는데 충돌했다면 (바닥이나 다른 블록에 닿음)
+      // 아래로 내려갔는데 충돌했다면
       if (collide(arena, player)) {
-        player.pos.y -= 1;     // 다시 위로 한 칸 올리고
-        merge(arena, player);  // 아레나에 현재 블록을 영구적으로 고정
+        player.pos.y -= 1;
+        merge(arena, player);
 
-        // 블록이 바닥에 닿았으니 위치를 맨 위로 초기화 (임시 조치)
-        player.pos.y = 0;
-        player.pos.x = 3;
+        // 블록이 고정되면 새로운 랜덤 블록을 뽑아옵니다!
+        playerReset();
       }
-      // 블록이 한 칸 내려갈 때마다 자동 하강 타이머 초기화
       dropCounter = 0;
     }
 
@@ -271,6 +269,25 @@
       }
     });
 
+    // 14. 새로운 블록을 랜덤하게 생성하는 함수
+    function playerReset() {
+      const pieces = 'ILJOTSZ';
+      // 문자열 길이를 이용해 7가지 중 하나의 문자를 무작위로 뽑음
+      const randomPiece = pieces[pieces.length * Math.random() | 0];
+      player.matrix = createPiece(randomPiece);
+
+      // 블록을 화면 맨 위, 가운데로 정렬
+      player.pos.y = 0;
+      player.pos.x = (arena[0].length / 2 | 0) -
+        (player.matrix[0].length / 2 | 0);
+
+      // 만약 새 블록이 나오자마자 기존 블록(벽)과 충돌한다면 (게임 오버)
+      if (collide(arena, player)) {
+        // 게임 보드를 0으로 싹 비워서 게임을 다시 시작합니다.
+        arena.forEach(row => row.fill(0));
+      }
+    }
+
     // 12. 자동 하강을 위한 시간 변수 설정
     let dropCounter = 0;
     let dropInterval = 1000; // 1000ms = 1초마다 하강
@@ -294,7 +311,8 @@
       // 브라우저에게 다음 프레임에 update 함수를 다시 실행해달라고 요청
       requestAnimationFrame(update);
     }
-
+    // 최초의 게임 시작! 랜덤 블록 하나를 뽑아두고 루프를 켭니다.
+    playerReset();
     // 최초의 게임 루프 시작!
     update();
   </script>
